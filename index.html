@@ -622,7 +622,7 @@ const APP_CONFIG = {
   MASTER_BASE_ID:    'appzhNrhkLSTEaNFW',         // Master-Base (Keys, User, Projekte)
   APP_BASE_ID:       'appWiwXgpRuVWWb29',         // Company-Balance App-Base
   AIRTABLE_READ_KEY: _k1 + _k2 + _k3 + _k4,
-  VERSION:           '0.4',
+  VERSION:           '0.5',
 };
 
 /* ─────────────────────────────────────────────────────────
@@ -1349,7 +1349,7 @@ function switchView(name) {
 
 async function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appContent').style.display = '';
+  document.getElementById('appContent').style.display = 'block';
 
   const u = APP_KEYS.user || {};
   document.getElementById('userName').textContent = u.name || u.email || 'User';
