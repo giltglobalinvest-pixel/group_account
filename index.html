@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --bg:        #f5f7fb;
@@ -222,6 +223,236 @@
   /* Views */
   .view { display: none; }
   .view.active { display: block; }
+
+  /* ── Demo-Banner ──────────────────────────────────────── */
+  .demo-banner {
+    background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #fcd34d;
+    color: #78350f;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .demo-banner .ico { font-size: 16px; }
+  .demo-banner strong { font-weight: 700; }
+
+  /* ── KPI-Cards ─────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(15,23,42,.10);
+  }
+  .kpi-card .label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 6px;
+  }
+  .kpi-card .value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  .kpi-card .value .unit {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 3px;
+  }
+  .kpi-card .delta {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-card .delta.up   { color: var(--success); }
+  .kpi-card .delta.down { color: var(--danger); }
+  .kpi-card .delta.flat { color: var(--muted); }
+
+  /* ── Chart-Cards ──────────────────────────────────────── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .chart-card .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+  .chart-card .head h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.2px;
+  }
+  .chart-card .head .sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .chart-card .canvas-wrap {
+    position: relative;
+    height: 280px;
+  }
+
+  /* ── Firmen-Cards ─────────────────────────────────────── */
+  .firma-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .firma-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .firma-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--brand);
+  }
+  .firma-card .head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .firma-card .logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .firma-card .name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    margin: 0;
+  }
+  .firma-card .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 2px 0 0;
+  }
+  .firma-card .mini-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .firma-card .mini-stats .stat .lbl {
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    font-weight: 600;
+  }
+  .firma-card .mini-stats .stat .val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  /* ── Firma-Detail (Drilldown) ─────────────────────────── */
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: all .15s;
+  }
+  .back-btn:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+
+  /* ── Dokumente-Tabelle ────────────────────────────────── */
+  .docs-table {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    border-collapse: collapse;
+  }
+  .docs-table th, .docs-table td {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .docs-table th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .4px;
+  }
+  .docs-table tr:last-child td { border-bottom: none; }
+  .docs-table tr:hover td { background: var(--bg); }
+  .docs-table .badge {
+    background: #e0e7ff;
+    color: var(--brand);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .docs-table .badge.current {
+    background: #dcfce7;
+    color: #166534;
+  }
 </style>
 </head>
 <body>
@@ -274,25 +505,82 @@
   </div>
 
   <div class="main">
+    <div id="demoBanner" class="demo-banner" style="display:none">
+      <span class="ico">✨</span>
+      <span><strong>Demo-Daten aktiv.</strong> Sobald reale Jahresabschluss-PDFs hochgeladen sind, werden diese fiktiven Werte ersetzt.</span>
+    </div>
+
     <!-- Gesamtübersicht -->
     <section class="view active" id="view-overview">
       <h1 class="page-title">Gesamtübersicht</h1>
       <p class="page-sub">Konsolidierte Kennzahlen aller freigegebenen Gesellschaften.</p>
-      <div class="empty-card">
-        <div class="ico">📊</div>
-        <h3>Noch keine Kennzahlen verfügbar</h3>
-        <p>Sobald Bilanzen / BWA-PDFs hochgeladen sind, erscheinen hier konsolidierte Charts.</p>
+
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="head">
+            <h3>Umsatzentwicklung</h3>
+            <span class="sub" id="chartRevenueSub">konsolidiert</span>
+          </div>
+          <div class="canvas-wrap"><canvas id="chartRevenue"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="head">
+            <h3>EBIT-Entwicklung</h3>
+            <span class="sub">konsolidiert</span>
+          </div>
+          <div class="canvas-wrap"><canvas id="chartEbit"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="head">
+            <h3>Vergleich Firmen · Umsatz</h3>
+            <span class="sub" id="chartCompareYear">aktuelles Jahr</span>
+          </div>
+          <div class="canvas-wrap"><canvas id="chartCompare"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="head">
+            <h3>Eigenkapitalquote</h3>
+            <span class="sub">Verlauf konsolidiert</span>
+          </div>
+          <div class="canvas-wrap"><canvas id="chartEquity"></canvas></div>
+        </div>
       </div>
     </section>
 
     <!-- Firmen -->
     <section class="view" id="view-companies">
-      <h1 class="page-title">Firmen</h1>
-      <p class="page-sub">Einzelansicht pro Gesellschaft mit historischem Verlauf.</p>
-      <div class="empty-card">
-        <div class="ico">🏢</div>
-        <h3>Keine Firmen geladen</h3>
-        <p>Firmen werden aus Airtable geladen, sobald die App-Base eingerichtet ist.</p>
+      <div id="firmaListWrap">
+        <h1 class="page-title">Firmen</h1>
+        <p class="page-sub">Einzelansicht pro Gesellschaft mit historischem Verlauf.</p>
+        <div class="firma-grid" id="firmaGrid"></div>
+      </div>
+
+      <div id="firmaDetailWrap" style="display:none">
+        <button class="back-btn" onclick="closeFirmaDetail()">← Zurück zur Übersicht</button>
+        <h1 class="page-title" id="firmaDetailName">—</h1>
+        <p class="page-sub" id="firmaDetailMeta">—</p>
+
+        <div class="kpi-grid" id="firmaKpiGrid"></div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="head"><h3>Umsatz · Verlauf</h3><span class="sub" id="firmaRevSub"></span></div>
+            <div class="canvas-wrap"><canvas id="firmaChartRevenue"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="head"><h3>EBIT · Verlauf</h3><span class="sub"></span></div>
+            <div class="canvas-wrap"><canvas id="firmaChartEbit"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="head"><h3>Bilanzsumme</h3><span class="sub"></span></div>
+            <div class="canvas-wrap"><canvas id="firmaChartBalance"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="head"><h3>Eigenkapitalquote</h3><span class="sub"></span></div>
+            <div class="canvas-wrap"><canvas id="firmaChartEquity"></canvas></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -300,11 +588,7 @@
     <section class="view" id="view-documents">
       <h1 class="page-title">Dokumente</h1>
       <p class="page-sub">Hochgeladene Jahresabschlüsse und BWAs.</p>
-      <div class="empty-card">
-        <div class="ico">📁</div>
-        <h3>Keine Dokumente</h3>
-        <p>Hier erscheinen PDFs sobald sie über den Admin-Bereich hochgeladen werden.</p>
-      </div>
+      <div id="docsWrap"></div>
     </section>
 
     <!-- Admin -->
@@ -339,8 +623,456 @@ const APP_CONFIG = {
   MASTER_BASE_ID:    'appzhNrhkLSTEaNFW',         // Master-Base (Keys, User, Projekte)
   APP_BASE_ID:       'appWiwXgpRuVWWb29',         // Company-Balance App-Base
   AIRTABLE_READ_KEY: _k1 + _k2 + _k3 + _k4,
-  VERSION:           '0.2',
+  VERSION:           '0.3',
 };
+
+/* ─────────────────────────────────────────────────────────
+ * DATEN-STATE
+ * ───────────────────────────────────────────────────────── */
+const DATA = {
+  companies: [],       // [{ id, name, slug, sektor, land, gegruendet, beschreibung, logo }]
+  statements: [],      // [{ id, companyId, year, type, period, is_current, pdf, metrics: {key:value} }]
+  isDemoMode: false,
+  chartInstances: {},  // Chart.js Instances → bei Re-Render zerstören
+};
+
+/* ─────────────────────────────────────────────────────────
+ * DEMO-DATEN · 4 fiktive Firmen × 5 Jahre
+ * ───────────────────────────────────────────────────────── */
+function buildDemoData() {
+  const years = [2021, 2022, 2023, 2024, 2025];
+  const cur = new Date().getFullYear();
+  const seeds = [
+    { name: 'GILT Global Invest GmbH',     slug: 'gilt',  sektor: 'Holding',            land: 'DE', base: 12_500_000, growth: 0.12, margin: 0.22, equity: 0.58 },
+    { name: 'Liftaro GmbH',                slug: 'lift',  sektor: 'Service / SaaS',     land: 'DE', base:  3_400_000, growth: 0.28, margin: 0.18, equity: 0.42 },
+    { name: 'FLP Lift Parts GmbH',         slug: 'flp',   sektor: 'Handel / Industrie', land: 'DE', base:  8_200_000, growth: 0.09, margin: 0.11, equity: 0.34 },
+    { name: 'Aszendio Aufzugservice GmbH', slug: 'aszd',  sektor: 'Service',            land: 'DE', base:  2_100_000, growth: 0.15, margin: 0.14, equity: 0.39 },
+  ];
+  const companies = seeds.map((s, i) => ({
+    id: 'demo_c_' + i, name: s.name, slug: s.slug, sektor: s.sektor, land: s.land,
+    gegruendet: String(2005 + i * 3), beschreibung: '', logo: null,
+  }));
+  const statements = [];
+  seeds.forEach((s, ci) => {
+    years.forEach((y, yi) => {
+      const factor = Math.pow(1 + s.growth, yi) * (0.92 + Math.random() * 0.16);
+      const revenue = Math.round(s.base * factor);
+      const ebit    = Math.round(revenue * (s.margin + (Math.random() - 0.5) * 0.04));
+      const bilanz  = Math.round(revenue * (1.4 + Math.random() * 0.3));
+      const equity  = Math.round(bilanz * (s.equity + (Math.random() - 0.5) * 0.06));
+      statements.push({
+        id: 'demo_s_' + ci + '_' + yi,
+        companyId: companies[ci].id,
+        year: y,
+        type: y === cur ? 'BWA' : 'Jahresabschluss',
+        period: y === cur ? y + '-Q4' : String(y),
+        is_current: y === cur,
+        pdf: null,
+        metrics: {
+          revenue, ebit, bilanzsumme: bilanz, equity, equity_ratio: equity / bilanz,
+        },
+      });
+    });
+  });
+  return { companies, statements };
+}
+
+/* ─────────────────────────────────────────────────────────
+ * DATEN-LOADER · Airtable → DATA, sonst Demo
+ * ───────────────────────────────────────────────────────── */
+async function loadAllData() {
+  // Companies + Statements + Metrics aus Airtable lesen
+  try {
+    const [cRes, sRes, mRes] = await Promise.all([
+      atFetch(APP_CONFIG.APP_BASE_ID, 'Company',   'pageSize=100'),
+      atFetch(APP_CONFIG.APP_BASE_ID, 'Statement', 'pageSize=100'),
+      atFetch(APP_CONFIG.APP_BASE_ID, 'Metric',    'pageSize=100'),
+    ]);
+    const companies  = (cRes.records || []).map(r => ({
+      id: r.id,
+      name: r.fields.name || '(unbenannt)',
+      slug: r.fields.slug || '',
+      sektor: r.fields.sektor || '',
+      land: r.fields.land || '',
+      gegruendet: r.fields.gegruendet || '',
+      beschreibung: r.fields.beschreibung || '',
+      logo: (r.fields.logo || [])[0]?.url || null,
+    }));
+    const statements = (sRes.records || []).map(r => ({
+      id: r.id,
+      companyId: (r.fields.company || [])[0] || null,
+      year: r.fields.year || null,
+      type: r.fields.type || 'BWA',
+      period: r.fields.period || '',
+      is_current: !!r.fields.is_current,
+      pdf: (r.fields.pdf || [])[0]?.url || null,
+      metrics: {},
+    }));
+    const stById = Object.fromEntries(statements.map(s => [s.id, s]));
+    (mRes.records || []).forEach(r => {
+      const sid = (r.fields.statement || [])[0];
+      if (sid && stById[sid] && r.fields.key) {
+        stById[sid].metrics[r.fields.key] = Number(r.fields.value) || 0;
+      }
+    });
+
+    if (companies.length === 0 || statements.length === 0) {
+      const demo = buildDemoData();
+      DATA.companies = demo.companies;
+      DATA.statements = demo.statements;
+      DATA.isDemoMode = true;
+    } else {
+      // Rechte-Filter: allowed_companies aus User
+      const allowed = APP_KEYS.user?.allowed_companies;
+      DATA.companies = Array.isArray(allowed) && allowed.length
+        ? companies.filter(c => allowed.includes(c.id))
+        : companies;
+      const allowedIds = new Set(DATA.companies.map(c => c.id));
+      DATA.statements = statements.filter(s => allowedIds.has(s.companyId));
+      DATA.isDemoMode = false;
+    }
+  } catch (e) {
+    console.warn('loadAllData fehlgeschlagen → Demo-Modus:', e);
+    const demo = buildDemoData();
+    DATA.companies = demo.companies;
+    DATA.statements = demo.statements;
+    DATA.isDemoMode = true;
+  }
+  document.getElementById('demoBanner').style.display = DATA.isDemoMode ? 'flex' : 'none';
+}
+
+/* ─────────────────────────────────────────────────────────
+ * FORMAT-HELPERS
+ * ───────────────────────────────────────────────────────── */
+const fmt = {
+  eur(n, opts = {}) {
+    if (n == null || isNaN(n)) return '—';
+    const abs = Math.abs(n);
+    if (opts.compact && abs >= 1_000_000) return (n / 1_000_000).toFixed(abs >= 10_000_000 ? 1 : 2).replace('.', ',') + ' Mio €';
+    if (opts.compact && abs >= 1_000)     return Math.round(n / 1_000) + ' T€';
+    return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  },
+  pct(n) {
+    if (n == null || isNaN(n)) return '—';
+    return (n * 100).toFixed(1).replace('.', ',') + ' %';
+  },
+  delta(curr, prev) {
+    if (prev == null || prev === 0 || curr == null) return null;
+    return (curr - prev) / Math.abs(prev);
+  },
+};
+
+/* ─────────────────────────────────────────────────────────
+ * KPI · konsolidiert + pro Firma
+ * ───────────────────────────────────────────────────────── */
+function aggregateConsolidated() {
+  const byYear = {};
+  DATA.statements.forEach(s => {
+    if (!s.year) return;
+    if (!byYear[s.year]) byYear[s.year] = { revenue: 0, ebit: 0, bilanzsumme: 0, equity: 0 };
+    byYear[s.year].revenue     += s.metrics.revenue     || 0;
+    byYear[s.year].ebit        += s.metrics.ebit        || 0;
+    byYear[s.year].bilanzsumme += s.metrics.bilanzsumme || 0;
+    byYear[s.year].equity      += s.metrics.equity      || 0;
+  });
+  Object.values(byYear).forEach(y => {
+    y.equity_ratio = y.bilanzsumme > 0 ? y.equity / y.bilanzsumme : 0;
+  });
+  return byYear;
+}
+
+function aggregateForCompany(companyId) {
+  const byYear = {};
+  DATA.statements.filter(s => s.companyId === companyId).forEach(s => {
+    if (!s.year) return;
+    byYear[s.year] = {
+      revenue:      s.metrics.revenue      || 0,
+      ebit:         s.metrics.ebit         || 0,
+      bilanzsumme:  s.metrics.bilanzsumme  || 0,
+      equity:       s.metrics.equity       || 0,
+      equity_ratio: s.metrics.bilanzsumme > 0 ? (s.metrics.equity || 0) / s.metrics.bilanzsumme : 0,
+    };
+  });
+  return byYear;
+}
+
+function renderKpiCards(targetId, byYear) {
+  const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+  if (!years.length) {
+    document.getElementById(targetId).innerHTML = '';
+    return;
+  }
+  const last = years[years.length - 1];
+  const prev = years.length > 1 ? years[years.length - 2] : null;
+  const cur = byYear[last], pre = prev ? byYear[prev] : null;
+
+  const cards = [
+    { label: 'Umsatz',            val: fmt.eur(cur.revenue,     { compact: true }), delta: pre ? fmt.delta(cur.revenue,     pre.revenue)     : null },
+    { label: 'EBIT',              val: fmt.eur(cur.ebit,        { compact: true }), delta: pre ? fmt.delta(cur.ebit,        pre.ebit)        : null },
+    { label: 'Bilanzsumme',       val: fmt.eur(cur.bilanzsumme, { compact: true }), delta: pre ? fmt.delta(cur.bilanzsumme, pre.bilanzsumme) : null },
+    { label: 'Eigenkapitalquote', val: fmt.pct(cur.equity_ratio),                    delta: pre ? (cur.equity_ratio - pre.equity_ratio) : null, deltaIsAbsPct: true },
+  ];
+
+  document.getElementById(targetId).innerHTML = cards.map(c => {
+    let deltaHtml = '';
+    if (c.delta != null) {
+      const cls = c.delta > 0.001 ? 'up' : c.delta < -0.001 ? 'down' : 'flat';
+      const arrow = c.delta > 0.001 ? '▲' : c.delta < -0.001 ? '▼' : '▬';
+      const txt = c.deltaIsAbsPct
+        ? (c.delta >= 0 ? '+' : '') + (c.delta * 100).toFixed(1).replace('.', ',') + ' pp'
+        : (c.delta >= 0 ? '+' : '') + (c.delta * 100).toFixed(1).replace('.', ',') + ' %';
+      deltaHtml = '<div class="delta ' + cls + '">' + arrow + ' ' + txt + ' vs. ' + prev + '</div>';
+    }
+    return '<div class="kpi-card"><div class="label">' + c.label + '</div>' +
+           '<div class="value">' + c.val + '</div>' + deltaHtml + '</div>';
+  }).join('');
+}
+
+/* ─────────────────────────────────────────────────────────
+ * CHART-RENDER
+ * ───────────────────────────────────────────────────────── */
+function destroyChart(key) {
+  if (DATA.chartInstances[key]) {
+    DATA.chartInstances[key].destroy();
+    delete DATA.chartInstances[key];
+  }
+}
+
+const CHART_COLORS = {
+  brand:  '#1a3a5c',
+  accent: '#7c3aed',
+  green:  '#16a34a',
+  amber:  '#f59e0b',
+  rose:   '#dc2626',
+  palette: ['#1a3a5c', '#7c3aed', '#16a34a', '#f59e0b', '#dc2626', '#0891b2', '#db2777'],
+};
+
+function commonChartOpts() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { font: { family: 'DM Sans', size: 11 }, color: '#64748b', boxWidth: 12 } },
+      tooltip: {
+        backgroundColor: '#0f172a',
+        titleFont: { family: 'DM Sans', size: 12, weight: '700' },
+        bodyFont:  { family: 'DM Sans', size: 12 },
+        padding: 10,
+        callbacks: {
+          label: (ctx) => {
+            const lbl = ctx.dataset.label || '';
+            const v = ctx.parsed.y;
+            if (ctx.dataset._kind === 'pct') return lbl + ': ' + (v * 100).toFixed(1).replace('.', ',') + ' %';
+            return lbl + ': ' + fmt.eur(v, { compact: true });
+          },
+        },
+      },
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#64748b' } },
+      y: {
+        grid: { color: '#f1f5f9' },
+        ticks: {
+          font: { family: 'DM Sans', size: 11 }, color: '#64748b',
+          callback: (v) => Math.abs(v) >= 1_000_000 ? (v / 1_000_000) + ' M' : Math.abs(v) >= 1_000 ? (v / 1_000) + ' T' : v,
+        },
+      },
+    },
+  };
+}
+
+function renderLineChart(canvasId, key, labels, datasets) {
+  destroyChart(key);
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  DATA.chartInstances[key] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: commonChartOpts(),
+  });
+}
+
+function renderBarChart(canvasId, key, labels, datasets, opts = {}) {
+  destroyChart(key);
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  const o = commonChartOpts();
+  if (opts.pctY) {
+    o.scales.y.ticks.callback = (v) => (v * 100).toFixed(0) + ' %';
+    o.scales.y.suggestedMax = 1;
+  }
+  DATA.chartInstances[key] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: o,
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+ * RENDER · Gesamtübersicht
+ * ───────────────────────────────────────────────────────── */
+function renderOverview() {
+  const consol = aggregateConsolidated();
+  const years = Object.keys(consol).map(Number).sort((a, b) => a - b);
+  if (!years.length) return;
+
+  renderKpiCards('kpiGrid', consol);
+  document.getElementById('chartCompareYear').textContent = String(years[years.length - 1]);
+
+  // Umsatz konsolidiert
+  renderLineChart('chartRevenue', 'revenue', years, [{
+    label: 'Umsatz',
+    data: years.map(y => consol[y].revenue),
+    borderColor: CHART_COLORS.brand,
+    backgroundColor: 'rgba(26,58,92,.12)',
+    fill: true, tension: 0.35, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5,
+  }]);
+
+  // EBIT konsolidiert
+  renderLineChart('chartEbit', 'ebit', years, [{
+    label: 'EBIT',
+    data: years.map(y => consol[y].ebit),
+    borderColor: CHART_COLORS.accent,
+    backgroundColor: 'rgba(124,58,237,.12)',
+    fill: true, tension: 0.35, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5,
+  }]);
+
+  // Vergleich Firmen aktueller Jahr (Umsatz)
+  const lastYear = years[years.length - 1];
+  const compData = DATA.companies.map(c => {
+    const s = DATA.statements.find(s => s.companyId === c.id && s.year === lastYear);
+    return { name: c.name, value: s?.metrics.revenue || 0 };
+  }).sort((a, b) => b.value - a.value);
+  renderBarChart('chartCompare', 'compare', compData.map(d => d.name), [{
+    label: 'Umsatz ' + lastYear,
+    data: compData.map(d => d.value),
+    backgroundColor: compData.map((_, i) => CHART_COLORS.palette[i % CHART_COLORS.palette.length]),
+    borderRadius: 6, borderSkipped: false,
+  }]);
+
+  // EK-Quote Verlauf
+  renderLineChart('chartEquity', 'equity', years, [{
+    label: 'EK-Quote', _kind: 'pct',
+    data: years.map(y => consol[y].equity_ratio),
+    borderColor: CHART_COLORS.green,
+    backgroundColor: 'rgba(22,163,74,.12)',
+    fill: true, tension: 0.35, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5,
+  }]);
+  // Y-Achse für EK-Quote auf Prozent umstellen
+  const ec = DATA.chartInstances.equity;
+  if (ec) {
+    ec.options.scales.y.ticks.callback = (v) => (v * 100).toFixed(0) + ' %';
+    ec.options.scales.y.suggestedMax = 1;
+    ec.update();
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+ * RENDER · Firmen-Liste + Detail
+ * ───────────────────────────────────────────────────────── */
+function renderFirmaList() {
+  const grid = document.getElementById('firmaGrid');
+  if (!DATA.companies.length) {
+    grid.innerHTML = '<div class="empty-card"><div class="ico">🏢</div><h3>Keine Firmen freigegeben</h3><p>Wende dich an den Administrator.</p></div>';
+    return;
+  }
+  grid.innerHTML = DATA.companies.map(c => {
+    const stmts = DATA.statements.filter(s => s.companyId === c.id);
+    const years = stmts.map(s => s.year).filter(Boolean).sort();
+    const lastYear = years[years.length - 1];
+    const lastStmt = stmts.find(s => s.year === lastYear);
+    const initials = (c.name || '?').split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    return `
+      <div class="firma-card" onclick="openFirmaDetail('${c.id}')">
+        <div class="head">
+          <div class="logo">${initials}</div>
+          <div>
+            <div class="name">${escapeHtml(c.name)}</div>
+            <div class="meta">${escapeHtml(c.sektor || '—')} · ${escapeHtml(c.land || '')}</div>
+          </div>
+        </div>
+        <div class="mini-stats">
+          <div class="stat"><div class="lbl">Umsatz ${lastYear || ''}</div><div class="val">${fmt.eur(lastStmt?.metrics.revenue, { compact: true })}</div></div>
+          <div class="stat"><div class="lbl">EK-Quote</div><div class="val">${lastStmt ? fmt.pct(lastStmt.metrics.equity_ratio) : '—'}</div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openFirmaDetail(companyId) {
+  const c = DATA.companies.find(x => x.id === companyId);
+  if (!c) return;
+  document.getElementById('firmaListWrap').style.display = 'none';
+  document.getElementById('firmaDetailWrap').style.display = '';
+  document.getElementById('firmaDetailName').textContent = c.name;
+  document.getElementById('firmaDetailMeta').textContent = [c.sektor, c.land, c.gegruendet ? 'gegründet ' + c.gegruendet : ''].filter(Boolean).join(' · ');
+
+  const byYear = aggregateForCompany(companyId);
+  const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+  renderKpiCards('firmaKpiGrid', byYear);
+
+  renderLineChart('firmaChartRevenue', 'fRev', years, [{
+    label: 'Umsatz', data: years.map(y => byYear[y].revenue),
+    borderColor: CHART_COLORS.brand, backgroundColor: 'rgba(26,58,92,.12)',
+    fill: true, tension: 0.35, pointRadius: 4, borderWidth: 2.5,
+  }]);
+  renderLineChart('firmaChartEbit', 'fEbit', years, [{
+    label: 'EBIT', data: years.map(y => byYear[y].ebit),
+    borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(124,58,237,.12)',
+    fill: true, tension: 0.35, pointRadius: 4, borderWidth: 2.5,
+  }]);
+  renderBarChart('firmaChartBalance', 'fBal', years, [{
+    label: 'Bilanzsumme', data: years.map(y => byYear[y].bilanzsumme),
+    backgroundColor: CHART_COLORS.amber, borderRadius: 6, borderSkipped: false,
+  }]);
+  renderLineChart('firmaChartEquity', 'fEq', years, [{
+    label: 'EK-Quote', _kind: 'pct', data: years.map(y => byYear[y].equity_ratio),
+    borderColor: CHART_COLORS.green, backgroundColor: 'rgba(22,163,74,.12)',
+    fill: true, tension: 0.35, pointRadius: 4, borderWidth: 2.5,
+  }]);
+  const fec = DATA.chartInstances.fEq;
+  if (fec) {
+    fec.options.scales.y.ticks.callback = (v) => (v * 100).toFixed(0) + ' %';
+    fec.options.scales.y.suggestedMax = 1;
+    fec.update();
+  }
+}
+
+function closeFirmaDetail() {
+  document.getElementById('firmaDetailWrap').style.display = 'none';
+  document.getElementById('firmaListWrap').style.display = '';
+  ['fRev', 'fEbit', 'fBal', 'fEq'].forEach(destroyChart);
+}
+
+/* ─────────────────────────────────────────────────────────
+ * RENDER · Dokumente
+ * ───────────────────────────────────────────────────────── */
+function renderDocs() {
+  const wrap = document.getElementById('docsWrap');
+  if (!DATA.statements.length) {
+    wrap.innerHTML = '<div class="empty-card"><div class="ico">📁</div><h3>Keine Dokumente</h3><p>Hier erscheinen PDFs sobald sie hochgeladen werden.</p></div>';
+    return;
+  }
+  const byCompany = Object.fromEntries(DATA.companies.map(c => [c.id, c.name]));
+  const rows = [...DATA.statements].sort((a, b) => (b.year || 0) - (a.year || 0));
+  wrap.innerHTML = '<table class="docs-table"><thead><tr>' +
+    '<th>Firma</th><th>Jahr</th><th>Typ</th><th>Period</th><th>Status</th><th>PDF</th>' +
+    '</tr></thead><tbody>' +
+    rows.map(s => {
+      const pdf = s.pdf ? '<a href="' + s.pdf + '" target="_blank" style="color:var(--brand-2);text-decoration:none;font-weight:600">↗ Öffnen</a>' : '<span style="color:var(--muted)">—</span>';
+      const statusBadge = s.is_current ? '<span class="badge current">aktuell</span>' : '<span class="badge">historisch</span>';
+      return '<tr><td>' + escapeHtml(byCompany[s.companyId] || '—') + '</td>' +
+             '<td>' + (s.year || '—') + '</td>' +
+             '<td>' + escapeHtml(s.type) + '</td>' +
+             '<td>' + escapeHtml(s.period || '—') + '</td>' +
+             '<td>' + statusBadge + '</td>' +
+             '<td>' + pdf + '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
 const APP_KEYS = {
   user: null,
@@ -589,6 +1321,10 @@ function switchView(name) {
   const pill = document.querySelector('.topbar nav .pill[data-view="' + name + '"]');
   if (view) view.classList.add('active');
   if (pill) pill.classList.add('active');
+
+  if (name === 'overview')  renderOverview();
+  if (name === 'companies') { closeFirmaDetail(); renderFirmaList(); }
+  if (name === 'documents') renderDocs();
 }
 
 async function showApp() {
@@ -605,6 +1341,10 @@ async function showApp() {
   if (role === 'admin') {
     setupTables().catch(e => console.warn('setupTables:', e));
   }
+
+  // Daten laden und initial Dashboard rendern
+  await loadAllData();
+  renderOverview();
 }
 
 /* ─────────────────────────────────────────────────────────
