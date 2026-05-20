@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Company Balance · GILT Global Invest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f5f7fb;
+    --panel:    #ffffff;
+    --border:   #e3e8f0;
+    --text:     #0f172a;
+    --muted:    #64748b;
+    --brand:    #1a3a5c;
+    --brand-2:  #2a5a8c;
+    --accent:   #7c3aed;
+    --accent-2: #a78bfa;
+    --success:  #16a34a;
+    --warn:     #f59e0b;
+    --danger:   #dc2626;
+    --shadow:   0 10px 30px rgba(15,23,42,.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, Segoe UI, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Spinner ──────────────────────────────────────────── */
+  .spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Login Screen ─────────────────────────────────────── */
+  #loginScreen {
+    display: none;
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #0e2440 0%, #1a3a5c 60%, #2a4870 100%);
+    z-index: 9999;
+    align-items: center; justify-content: center;
+    flex-direction: column;
+    padding: 24px;
+  }
+  #loginScreen .brand {
+    text-align: center;
+    margin-bottom: 28px;
+    color: #fff;
+  }
+  #loginScreen .brand .icon {
+    font-size: 44px;
+    line-height: 1;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 6px 20px rgba(167,139,250,.4));
+  }
+  #loginScreen .brand .title {
+    font-size: 30px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  #loginScreen .brand .subtitle {
+    font-size: 13px; color: rgba(255,255,255,.65); margin-top: 4px;
+  }
+  #loginScreen .conn-row {
+    display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center;
+  }
+  #loginScreen .conn-chip {
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px; padding: 5px 12px; font-size: 11.5px; color: rgba(255,255,255,.75);
+    display: flex; align-items: center; gap: 6px;
+  }
+  #loginScreen .conn-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #94a3b8; transition: background .3s;
+  }
+  #loginScreen .conn-dot.ok   { background: #4ade80; }
+  #loginScreen .conn-dot.bad  { background: #f87171; }
+  #loginScreen .conn-dot.warn { background: #facc15; }
+
+  #loginScreen .card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 30px;
+    width: min(400px, 92vw);
+    box-shadow: 0 30px 70px rgba(0,0,0,.4);
+  }
+  #loginScreen .card h2 {
+    margin: 0 0 4px; font-size: 22px; color: var(--brand);
+  }
+  #loginScreen .card p.hint {
+    margin: 0 0 22px; font-size: 13px; color: var(--muted);
+  }
+  #loginScreen .card input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color .15s;
+  }
+  #loginScreen .card input:focus {
+    border-color: var(--brand);
+  }
+  #loginScreen .card button {
+    width: 100%;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, transform .05s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  #loginScreen .card button:hover { background: var(--brand-2); }
+  #loginScreen .card button:active { transform: translateY(1px); }
+  #loginScreen .card .login-error {
+    color: var(--danger); font-size: 12.5px; margin-top: 12px; text-align: center; display: none;
+  }
+  #loginScreen .footer {
+    color: rgba(255,255,255,.35); font-size: 11px; margin-top: 22px;
+  }
+
+  /* ── Setup-Banner (sichtbar solange Konfig fehlt) ────── */
+  #setupBanner {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    padding: 10px 16px;
+    font-size: 13px;
+    display: none;
+  }
+  #setupBanner code {
+    background: rgba(154,52,18,.08);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* ── App-Shell ────────────────────────────────────────── */
+  #appContent { display: none; min-height: 100vh; }
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .topbar .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 18px; letter-spacing: -0.3px;
+  }
+  .topbar .logo .icon {
+    font-size: 22px; line-height: 1;
+  }
+  .topbar nav {
+    display: flex; gap: 4px; margin-left: 24px;
+  }
+  .topbar nav .pill {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .topbar nav .pill:hover { color: var(--text); background: var(--bg); }
+  .topbar nav .pill.active {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+  }
+  .topbar .spacer { flex: 1; }
+  .topbar .user-chip {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 6px 5px 14px;
+    font-size: 13px;
+  }
+  .topbar .user-chip .role-badge {
+    font-size: 10.5px; font-weight: 700;
+    color: var(--brand); background: #e0e7ff;
+    border-radius: 999px; padding: 2px 8px;
+    text-transform: uppercase; letter-spacing: .3px;
+  }
+  .topbar .user-chip button {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .topbar .user-chip button:hover { color: var(--danger); border-color: var(--danger); }
+
+  .main {
+    padding: 28px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .page-title {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.4px;
+    margin: 0 0 4px;
+  }
+  .page-sub {
+    color: var(--muted); font-size: 14px; margin: 0 0 24px;
+  }
+
+  /* Empty-state Karten für die ersten Views */
+  .empty-card {
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-card .ico { font-size: 36px; margin-bottom: 8px; }
+  .empty-card h3 { margin: 6px 0; color: var(--text); font-size: 16px; font-weight: 600; }
+  .empty-card p { margin: 0; font-size: 13px; }
+
+  /* Views */
+  .view { display: none; }
+  .view.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN SCREEN ══════════════════ -->
+<div id="loginScreen">
+  <div class="brand">
+    <div class="icon">💎</div>
+    <div class="title">Company Balance</div>
+    <div class="subtitle">Investor-Dashboard · GILT Global Invest</div>
+  </div>
+
+  <div class="conn-row">
+    <div class="conn-chip"><span id="connAirtableDot" class="conn-dot"></span> Airtable</div>
+    <div class="conn-chip"><span id="connProxyDot" class="conn-dot"></span> Backend</div>
+  </div>
+
+  <div class="card">
+    <h2>Anmelden</h2>
+    <p class="hint">Bitte deinen persönlichen Zugangscode eingeben.</p>
+    <input id="loginKeyInput" type="password" placeholder="Zugangscode …"
+           onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off">
+    <button onclick="doLogin()" id="loginBtn">
+      <span id="loginBtnLabel">Anmelden</span>
+      <span id="loginBtnSpinner" class="spinner" style="display:none"></span>
+    </button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+
+  <div class="footer">GILT Global Invest GmbH · v<span id="loginVersion">0.1</span></div>
+</div>
+
+<!-- ══════════════════ APP CONTENT ══════════════════ -->
+<div id="appContent">
+
+  <div id="setupBanner">
+    ⚙️ <strong>Setup-Modus.</strong> <code>APP_BASE_ID</code> und/oder <code>AIRTABLE_READ_KEY</code> sind noch nicht gesetzt — Login & Daten-Layer sind deaktiviert. Siehe CLAUDE.md → Status / TODO.
+  </div>
+
+  <div class="topbar">
+    <div class="logo"><span class="icon">💎</span> Company Balance</div>
+    <nav>
+      <button class="pill active" data-view="overview" onclick="switchView('overview')">Gesamtübersicht</button>
+      <button class="pill" data-view="companies" onclick="switchView('companies')">Firmen</button>
+      <button class="pill" data-view="documents" onclick="switchView('documents')">Dokumente</button>
+      <button class="pill" data-view="admin" id="navAdmin" style="display:none" onclick="switchView('admin')">Admin</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="user-chip">
+      <span id="userName">—</span>
+      <span class="role-badge" id="userRole">—</span>
+      <button onclick="doLogout()" title="Abmelden">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Gesamtübersicht -->
+    <section class="view active" id="view-overview">
+      <h1 class="page-title">Gesamtübersicht</h1>
+      <p class="page-sub">Konsolidierte Kennzahlen aller freigegebenen Gesellschaften.</p>
+      <div class="empty-card">
+        <div class="ico">📊</div>
+        <h3>Noch keine Kennzahlen verfügbar</h3>
+        <p>Sobald Bilanzen / BWA-PDFs hochgeladen sind, erscheinen hier konsolidierte Charts.</p>
+      </div>
+    </section>
+
+    <!-- Firmen -->
+    <section class="view" id="view-companies">
+      <h1 class="page-title">Firmen</h1>
+      <p class="page-sub">Einzelansicht pro Gesellschaft mit historischem Verlauf.</p>
+      <div class="empty-card">
+        <div class="ico">🏢</div>
+        <h3>Keine Firmen geladen</h3>
+        <p>Firmen werden aus Airtable geladen, sobald die App-Base eingerichtet ist.</p>
+      </div>
+    </section>
+
+    <!-- Dokumente -->
+    <section class="view" id="view-documents">
+      <h1 class="page-title">Dokumente</h1>
+      <p class="page-sub">Hochgeladene Jahresabschlüsse und BWAs.</p>
+      <div class="empty-card">
+        <div class="ico">📁</div>
+        <h3>Keine Dokumente</h3>
+        <p>Hier erscheinen PDFs sobald sie über den Admin-Bereich hochgeladen werden.</p>
+      </div>
+    </section>
+
+    <!-- Admin -->
+    <section class="view" id="view-admin">
+      <h1 class="page-title">Admin</h1>
+      <p class="page-sub">Firmen, User-Rechte und PDF-Upload.</p>
+      <div class="empty-card">
+        <div class="ico">🛠️</div>
+        <h3>Admin-Bereich in Vorbereitung</h3>
+        <p>Wird in Kürze die PDF-Upload-UI und User-/Rechte-Verwaltung enthalten.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ══════════════════ JAVASCRIPT ══════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────
+ * APP CONFIG
+ * ───────────────────────────────────────────────────────── */
+
+// AIRTABLE_READ_KEY: Personal Access Token (read-only) — Setup-TODO.
+// Wird in 4 Teile aufgesplittet, damit Secret-Scanner ihn nicht auf GitHub findet.
+// Sobald PAT bereitsteht: hier die Fragmente eintragen.
+const _k1 = '';   // TODO: PAT-Teil 1
+const _k2 = '';   // TODO: PAT-Teil 2
+const _k3 = '';   // TODO: PAT-Teil 3
+const _k4 = '';   // TODO: PAT-Teil 4
+
+const APP_CONFIG = {
+  PROJECT_ID:        'p_1779312884567',          // Airtable Master · Claude App Deployer
+  MASTER_BASE_ID:    'appzhNrhkLSTEaNFW',         // Master-Base (Keys-Tabelle)
+  APP_BASE_ID:       '',                           // TODO: App-Base für User/Company/Statement/Metric
+  AIRTABLE_READ_KEY: (_k1 + _k2 + _k3 + _k4) || '',
+  VERSION:           '0.1',
+};
+
+const APP_KEYS = {
+  user: null,
+  anthropicKey: null,
+  airtableWriteKey: null,
+  appBaseId: null,
+  valtownKey: null,
+  proxyUrl: null,
+  proxyValId: null,
+};
+
+/* ─────────────────────────────────────────────────────────
+ * SETUP-CHECK · zeigt Banner solange Konfig fehlt
+ * ───────────────────────────────────────────────────────── */
+function isSetupComplete() {
+  return !!(APP_CONFIG.APP_BASE_ID && APP_CONFIG.AIRTABLE_READ_KEY);
+}
+
+/* ─────────────────────────────────────────────────────────
+ * AIRTABLE HELPERS
+ * ───────────────────────────────────────────────────────── */
+async function atFetch(baseId, table, params) {
+  if (!APP_CONFIG.AIRTABLE_READ_KEY) throw new Error('AIRTABLE_READ_KEY fehlt (Setup-TODO)');
+  let url = 'https://api.airtable.com/v0/' + baseId + '/' + encodeURIComponent(table);
+  if (params) url += '?' + params;
+  const res = await fetch(url, {
+    headers: { 'Authorization': 'Bearer ' + APP_CONFIG.AIRTABLE_READ_KEY }
+  });
+  if (!res.ok) throw new Error('Airtable HTTP ' + res.status);
+  return res.json();
+}
+
+/* ─────────────────────────────────────────────────────────
+ * LOGIN
+ * ───────────────────────────────────────────────────────── */
+async function loginWithUserKey(userKey) {
+  if (!isSetupComplete()) throw new Error('Setup nicht abgeschlossen (siehe CLAUDE.md)');
+
+  const formula = "AND({api_key}='" + userKey.replace(/'/g, "\\'") + "',{status}='aktiv')";
+  const userData = await atFetch(
+    APP_CONFIG.APP_BASE_ID, 'User',
+    'filterByFormula=' + encodeURIComponent(formula) + '&maxRecords=1'
+  );
+  if (!userData.records || !userData.records.length) {
+    throw new Error('Ungültiger Zugangscode');
+  }
+  APP_KEYS.user = userData.records[0].fields;
+  APP_KEYS.user._recordId = userData.records[0].id;
+
+  // Projekt-Keys aus Master-Base laden
+  const keysData = await atFetch(
+    APP_CONFIG.MASTER_BASE_ID, 'Keys',
+    'filterByFormula=' + encodeURIComponent("{project_id}='" + APP_CONFIG.PROJECT_ID + "'")
+  );
+  (keysData.records || []).forEach(r => {
+    const { key_name, key_value } = r.fields || {};
+    if (key_name && key_value && APP_KEYS.hasOwnProperty(key_name)) {
+      APP_KEYS[key_name] = key_value;
+    }
+    if (key_name === 'airtableBaseId') APP_KEYS.appBaseId = key_value;
+  });
+
+  // Optional: GLOBAL-Fallback für anthropicKey
+  if (!APP_KEYS.anthropicKey) {
+    try {
+      const g = await atFetch(
+        APP_CONFIG.MASTER_BASE_ID, 'Keys',
+        'filterByFormula=' + encodeURIComponent("AND({project_id}='GLOBAL',{key_name}='anthropicKey')") + '&maxRecords=1'
+      );
+      if (g.records && g.records.length) APP_KEYS.anthropicKey = g.records[0].fields.key_value;
+    } catch (e) { /* GLOBAL-Fallback ist optional */ }
+  }
+
+  localStorage.setItem('user_key_' + APP_CONFIG.PROJECT_ID, userKey);
+  return APP_KEYS.user;
+}
+
+async function tryAutoLogin() {
+  const saved = localStorage.getItem('user_key_' + APP_CONFIG.PROJECT_ID);
+  if (!saved) return false;
+  try {
+    await loginWithUserKey(saved);
+    return true;
+  } catch (e) {
+    localStorage.removeItem('user_key_' + APP_CONFIG.PROJECT_ID);
+    return false;
+  }
+}
+
+async function doLogin() {
+  const input  = document.getElementById('loginKeyInput');
+  const errEl  = document.getElementById('loginError');
+  const label  = document.getElementById('loginBtnLabel');
+  const spin   = document.getElementById('loginBtnSpinner');
+  const key    = (input.value || '').trim();
+
+  errEl.style.display = 'none';
+
+  if (!key) {
+    errEl.textContent = 'Bitte Zugangscode eingeben.';
+    errEl.style.display = '';
+    return;
+  }
+
+  label.style.display = 'none';
+  spin.style.display = '';
+  try {
+    await loginWithUserKey(key);
+    await showApp();
+  } catch (e) {
+    errEl.textContent = e.message || 'Login fehlgeschlagen.';
+    errEl.style.display = '';
+  } finally {
+    label.style.display = '';
+    spin.style.display = 'none';
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('user_key_' + APP_CONFIG.PROJECT_ID);
+  Object.keys(APP_KEYS).forEach(k => APP_KEYS[k] = null);
+  location.reload();
+}
+
+/* ─────────────────────────────────────────────────────────
+ * APP-SHELL
+ * ───────────────────────────────────────────────────────── */
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.topbar nav .pill').forEach(p => p.classList.remove('active'));
+  const view = document.getElementById('view-' + name);
+  const pill = document.querySelector('.topbar nav .pill[data-view="' + name + '"]');
+  if (view) view.classList.add('active');
+  if (pill) pill.classList.add('active');
+}
+
+async function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = '';
+
+  // User-Chip
+  const u = APP_KEYS.user || {};
+  document.getElementById('userName').textContent = u.name || u.email || 'User';
+  const role = (u.role || 'investor').toLowerCase();
+  document.getElementById('userRole').textContent = role;
+
+  // Admin-Nav nur für Admin-Rolle
+  document.getElementById('navAdmin').style.display = role === 'admin' ? '' : 'none';
+
+  // Setup-Banner (für Admin sichtbar, falls noch nicht alles drin ist)
+  if (role === 'admin' && (!APP_KEYS.valtownKey || !APP_KEYS.proxyUrl)) {
+    document.getElementById('setupBanner').style.display = '';
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+ * CONNECTION CHECKS (Login-Screen Chips)
+ * ───────────────────────────────────────────────────────── */
+async function checkConnections() {
+  const atDot    = document.getElementById('connAirtableDot');
+  const proxyDot = document.getElementById('connProxyDot');
+
+  // Airtable: nur "ok" wenn beide Configs gesetzt sind, sonst warn
+  if (!isSetupComplete()) {
+    atDot.classList.add('warn');
+  } else {
+    try {
+      await atFetch(APP_CONFIG.MASTER_BASE_ID, 'Keys', 'maxRecords=1');
+      atDot.classList.add('ok');
+    } catch (e) {
+      atDot.classList.add('bad');
+    }
+  }
+
+  // Backend (val.town) — Status wird erst nach Login bekannt; bis dahin warn
+  proxyDot.classList.add('warn');
+}
+
+/* ─────────────────────────────────────────────────────────
+ * BOOT
+ * ───────────────────────────────────────────────────────── */
+(async function boot() {
+  document.getElementById('loginVersion').textContent = APP_CONFIG.VERSION;
+
+  if (!isSetupComplete()) {
+    // Login-Screen anzeigen, Versuch verhindern
+    document.getElementById('loginScreen').style.display = 'flex';
+    checkConnections();
+    const err = document.getElementById('loginError');
+    err.textContent = 'Setup nicht abgeschlossen. Bitte CLAUDE.md → Status / TODO.';
+    err.style.display = '';
+    document.getElementById('loginBtn').disabled = true;
+    document.getElementById('loginBtn').style.opacity = '.55';
+    document.getElementById('loginBtn').style.cursor = 'not-allowed';
+    return;
+  }
+
+  document.getElementById('loginScreen').style.display = 'flex';
+  checkConnections();
+
+  if (await tryAutoLogin()) {
+    await showApp();
+    return;
+  }
+})();
+</script>
+</body>
+</html>
