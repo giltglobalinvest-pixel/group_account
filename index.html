@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --bg:        #f5f7fb;
@@ -623,7 +622,7 @@ const APP_CONFIG = {
   MASTER_BASE_ID:    'appzhNrhkLSTEaNFW',         // Master-Base (Keys, User, Projekte)
   APP_BASE_ID:       'appWiwXgpRuVWWb29',         // Company-Balance App-Base
   AIRTABLE_READ_KEY: _k1 + _k2 + _k3 + _k4,
-  VERSION:           '0.3',
+  VERSION:           '0.4',
 };
 
 /* ─────────────────────────────────────────────────────────
@@ -829,6 +828,23 @@ function renderKpiCards(targetId, byYear) {
 }
 
 /* ─────────────────────────────────────────────────────────
+ * CHART.JS · dynamisch laden (loader-safe, kein document.write-Konflikt)
+ * ───────────────────────────────────────────────────────── */
+let _chartJsPromise = null;
+function ensureChartJs() {
+  if (window.Chart) return Promise.resolve();
+  if (_chartJsPromise) return _chartJsPromise;
+  _chartJsPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+    s.onload = () => resolve();
+    s.onerror = (e) => { _chartJsPromise = null; reject(new Error('Chart.js konnte nicht geladen werden')); };
+    document.head.appendChild(s);
+  });
+  return _chartJsPromise;
+}
+
+/* ─────────────────────────────────────────────────────────
  * CHART-RENDER
  * ───────────────────────────────────────────────────────── */
 function destroyChart(key) {
@@ -882,6 +898,7 @@ function commonChartOpts() {
 }
 
 function renderLineChart(canvasId, key, labels, datasets) {
+  if (!window.Chart) return;
   destroyChart(key);
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
@@ -893,6 +910,7 @@ function renderLineChart(canvasId, key, labels, datasets) {
 }
 
 function renderBarChart(canvasId, key, labels, datasets, opts = {}) {
+  if (!window.Chart) return;
   destroyChart(key);
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
@@ -911,12 +929,13 @@ function renderBarChart(canvasId, key, labels, datasets, opts = {}) {
 /* ─────────────────────────────────────────────────────────
  * RENDER · Gesamtübersicht
  * ───────────────────────────────────────────────────────── */
-function renderOverview() {
+async function renderOverview() {
   const consol = aggregateConsolidated();
   const years = Object.keys(consol).map(Number).sort((a, b) => a - b);
   if (!years.length) return;
 
   renderKpiCards('kpiGrid', consol);
+  try { await ensureChartJs(); } catch (e) { console.error(e); return; }
   document.getElementById('chartCompareYear').textContent = String(years[years.length - 1]);
 
   // Umsatz konsolidiert
@@ -999,7 +1018,7 @@ function renderFirmaList() {
   }).join('');
 }
 
-function openFirmaDetail(companyId) {
+async function openFirmaDetail(companyId) {
   const c = DATA.companies.find(x => x.id === companyId);
   if (!c) return;
   document.getElementById('firmaListWrap').style.display = 'none';
@@ -1010,6 +1029,7 @@ function openFirmaDetail(companyId) {
   const byYear = aggregateForCompany(companyId);
   const years = Object.keys(byYear).map(Number).sort((a, b) => a - b);
   renderKpiCards('firmaKpiGrid', byYear);
+  try { await ensureChartJs(); } catch (e) { console.error(e); return; }
 
   renderLineChart('firmaChartRevenue', 'fRev', years, [{
     label: 'Umsatz', data: years.map(y => byYear[y].revenue),
@@ -1342,9 +1362,17 @@ async function showApp() {
     setupTables().catch(e => console.warn('setupTables:', e));
   }
 
-  // Daten laden und initial Dashboard rendern
-  await loadAllData();
-  renderOverview();
+  // Daten laden und initial Dashboard rendern (defensiv: niemals weiße Seite riskieren)
+  try {
+    await loadAllData();
+  } catch (e) {
+    console.error('loadAllData:', e);
+  }
+  try {
+    await renderOverview();
+  } catch (e) {
+    console.error('renderOverview:', e);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────
